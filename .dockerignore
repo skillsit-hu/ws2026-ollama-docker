@@ -1,0 +1,4 @@
+ollama-data/
+authorized_keys
+.env
+.git/
