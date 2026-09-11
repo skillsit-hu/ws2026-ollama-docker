@@ -26,3 +26,17 @@ services:
               count: 1
               capabilities:
                 - gpu
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "0.0.0.0:${WEBUI_PORT:-3000}:8080"
+    volumes:
+      - ./open-webui-data:/app/backend/data
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY}
