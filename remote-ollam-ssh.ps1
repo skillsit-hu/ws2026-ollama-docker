@@ -1,3 +1,3 @@
-$env:OLLAMA_HOST = "http://192.168.1.138:11435"
-ollama list
-ollama run qwen4b:latest
+ssh -p 2222 root@donat.fork.hu
+
+ssh -p 2222 root@jasz.fork.hu
