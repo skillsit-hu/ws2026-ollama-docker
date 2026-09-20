@@ -23,9 +23,10 @@ const res = await fetch(URL, {
     ],
     stream: false,
     think: false,
-    options: { num_ctx: 4096 }
+    options: { num_ctx: 10000 }
   })
 })
 const out = (await res.json()).message.content.trim()
+await writeFile(file + '.bak', src)
 await writeFile(file, out)
 console.log(out)

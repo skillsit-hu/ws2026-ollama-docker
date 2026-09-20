@@ -17,6 +17,8 @@ node index.mjs index.html deck.md    # file + extra context
 
 Both args optional. With no args it asks `file:` on stdin. It always asks `prompt:`.
 
+Writes `<file>.bak` (the pre-run source) next to `<file>` on every run. Add `*.bak` to `.gitignore`.
+
 ## The four memory blocks
 
 Type them in this order. Each block is one idea, not one line.
@@ -72,9 +74,12 @@ User message order: **ctx → file → src → task**. Context first, task last.
 
 ```js
 const out = (await res.json()).message.content.trim()
+await writeFile(file + '.bak', src)
 await writeFile(file, out)
 console.log(out)
 ```
+
+**Backup first, then overwrite.** `src` is still in memory and `writeFile` is already imported — the backup costs one line and no new import. Never type `copyFile`.
 
 `.message.content` — this is `/api/chat`. (`/api/generate` would be `.response`.)
 
@@ -84,6 +89,7 @@ console.log(out)
 - **file, src, ctx, task** — the inputs, in typing order.
 - **ctx, file, src, task** — the prompt, in sending order. Only the ctx moves.
 - **json → message → content → trim** — the unwrap chain.
+- **bak before file** — the two `writeFile` calls, in that order.
 - Top-level `await` everywhere. It is `.mjs`, so no `async function main()` wrapper. Never type one.
 
 ## Two knobs
@@ -97,7 +103,13 @@ Endpoint is `/api/chat` with a `messages` array. Do not mix it with `/api/genera
 
 ## Traps
 
-**It overwrites `<file>` in place.** No backup, no diff, no confirm. Commit or copy before every run. A bad generation eats your working file — this is the one failure that costs real minutes.
+**`<file>.bak` holds exactly one generation.** Every run overwrites it with the version from *that* run. Good run then bad run = the `.bak` is now the good one, restore it. Bad run then another bad run = the original is gone. After a bad generation, restore **before** you run again:
+
+```bash
+cp index.html.bak index.html
+```
+
+Still commit before a risky sequence. The `.bak` is a one-step undo, not history.
 
 **`num_ctx: 4096` is the whole budget** — ctx + src + task share it. A long context file silently pushes your source out of the window and the model returns a truncated file. If the output comes back short, that is why. Raise to `8192`.
 
