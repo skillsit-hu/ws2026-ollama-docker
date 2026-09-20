@@ -8,6 +8,7 @@ const SYS = 'Return the full updated file only. No comments. No markdown.'
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const file = process.argv[2]?.trim() || await rl.question('file: ')
 const src = await readFile(file, 'utf8')
+const ctx = process.argv[3] ? await readFile(process.argv[3].trim(), 'utf8') : ''
 const task = await rl.question('prompt: ')
 rl.close()
 
@@ -18,7 +19,7 @@ const res = await fetch(URL, {
     model: MODEL,
     messages: [
       { role: 'system', content: SYS },
-      { role: 'user', content: `file: ${file}\n\n${src}\n\n${task}` }
+      { role: 'user', content: `${ctx}\n\nfile: ${file}\n\n${src}\n\n${task}` }
     ],
     stream: false,
     think: false,
